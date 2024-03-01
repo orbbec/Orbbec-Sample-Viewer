@@ -68,18 +68,6 @@ void mat2texture(cv::Mat* source, GLuint& target)
     tmpMat.release();
 }
 
-float getDispRatio(cv::Size matSize, cv::Point2f windowSize)
-{
-    cout << matSize << windowSize << endl;
-    float ratio[4] = { matSize.width / windowSize.x, matSize.height / windowSize.y, windowSize.x / matSize.width, windowSize.y / matSize.height };
-
-    std::sort(ratio, ratio + 4, std::greater<float>());
-    for (int i = 0; i < 4; i++) cout << ratio[i] << " ";
-    cout << endl;
-
-    return ratio[3];
-}
-
 void objectDisableBegin()
 {
     ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
@@ -328,11 +316,6 @@ int main(int, char**)
             is_booting = false;
         }
         if (is_export_cam_param) {
-            const char* label1[] = { "fx", "fy", "cx", "cy" };
-            const char* label2[] = { "r00", "r01", "r02", "r10", "r11", "r12", "r20", "r21", "r22" };
-            const char* label3[] = { "t1", "t2", "t3" };
-            //const char* label4[] = { "k1", "k2", "k3", "p1", "p2" };
-            const char* label4[] = { "k1", "k2", "p1", "p2", "k3" };
             OBCameraParam camParams = ob_service->getCameraParams();
             string filename = "CameraParameters_";
             string tmpStr = ob_device.substr(0, ob_device.find_last_of("#") - 1);
@@ -340,7 +323,6 @@ int main(int, char**)
             filename.append(getCurrentDateTime(true)).append(".ini");
 
             std::ofstream outFile;
-            //tmpStr = _deviceList[0]->at(0).substr(0, _deviceList[0]->at(0).find_last_of("#") - 1);
             outFile.open(filename);
             outFile << ob_device << endl;
             outFile << "IR fx" << " = " << camParams.depthIntrinsic.fx << endl;
@@ -440,9 +422,6 @@ int main(int, char**)
             ImGui::PushStyleColor(ImGuiCol_ButtonHovered, gray_hovered);
         }
         if (ImGui::Button("Point Cloud", ImVec2(stream_btn_width, 0.f))) {
-            //is_streaming[0] = false;
-            //is_streaming[1] = false;
-            //is_streaming[2] = false;
             is_streaming[3] = !is_streaming[3];
             if (!is_streaming[0]) {
                 ob_service->switchColorStream(is_streaming[3]);
@@ -454,7 +433,6 @@ int main(int, char**)
                 is_HW_D2C = !is_HW_D2C;
                 ob_service->toggleD2CAlignment(0);
             }
-            //if (!is_streaming[3])
             ob_service->togglePointCloud();
         }
         ImGui::PopStyleColor(2);
@@ -808,73 +786,67 @@ int main(int, char**)
             }
         }
         // Data Management
-        {
-            if (ImGui::CollapsingHeader("Data Management")) {
-                if (!is_streaming[3]) {
-                    static int int_frame_num = 1;
-                    // Toggle button for saving current frame data
-                    switch_label = is_save_img ? "Saving" : "Save";
-                    ImGui::Text("Frame Capturing");
-                    if (streaming_check == 0) objectDisableBegin();
-                    ImGui::PushID("Save Image");
-                    if (!is_streaming[0]) objectDisableBegin();
-                    ImGui::Checkbox("COLOR", &is_saving[0]);
-                    if (!is_streaming[0]) objectDisableEnd();
-                    ImGui::SameLine();
-                    if (!is_streaming[1]) objectDisableBegin();
-                    ImGui::Checkbox("DEPTH", &is_saving[1]);
-                    if (!is_streaming[1]) objectDisableEnd();
-                    ImGui::SameLine();
-                    if (!is_streaming[2]) objectDisableBegin();
-                    ImGui::Checkbox("IR", &is_saving[2]);
-                    if (!is_streaming[2]) objectDisableEnd();
-                    ImGui::Text("CapturedFrames(frame)");
-                    ImGui::InputInt("##frame num", &int_frame_num, 0, 0);
-                    ImGui::SameLine(ctrl_obj_spacing);
+        if (ImGui::CollapsingHeader("Data Management")) {
+            if (!is_streaming[3]) {
+                static int int_frame_num = 1;
+                // Toggle button for saving current frame data
+                switch_label = is_save_img ? "Saving" : "Save";
+                ImGui::Text("Frame Capturing");
+                if (streaming_check == 0) objectDisableBegin();
+                ImGui::PushID("Save Image");
+                if (!is_streaming[0]) objectDisableBegin();
+                ImGui::Checkbox("COLOR", &is_saving[0]);
+                if (!is_streaming[0]) objectDisableEnd();
+                ImGui::SameLine();
+                if (!is_streaming[1]) objectDisableBegin();
+                ImGui::Checkbox("DEPTH", &is_saving[1]);
+                if (!is_streaming[1]) objectDisableEnd();
+                ImGui::SameLine();
+                if (!is_streaming[2]) objectDisableBegin();
+                ImGui::Checkbox("IR", &is_saving[2]);
+                if (!is_streaming[2]) objectDisableEnd();
+                ImGui::Text("CapturedFrames(frame)");
+                ImGui::InputInt("##frame num", &int_frame_num, 0, 0);
+                ImGui::SameLine(ctrl_obj_spacing);
 
-                    int capturing_check = std::accumulate(is_saving, is_saving + 3, 0);
-                    if (!capturing_check) objectDisableBegin();
-                    ImGui::Button(switch_label.c_str(), ImVec2({ ctrl_btn_width, 0.0f }));
-                    if (ImGui::IsItemClicked(0)) {
-                        is_save_img = true;
-                        ob_service->startFrameCapturing(is_saving, int_frame_num);
-                    }
-                    if (!capturing_check) objectDisableEnd();
-                    ImGui::PopID();
-                    if (streaming_check == 0) objectDisableEnd();
+                int capturing_check = std::accumulate(is_saving, is_saving + 3, 0);
+                if (!capturing_check) objectDisableBegin();
+                ImGui::Button(switch_label.c_str(), ImVec2({ ctrl_btn_width, 0.0f }));
+                if (ImGui::IsItemClicked(0)) {
+                    is_save_img = true;
+                    ob_service->startFrameCapturing(is_saving, int_frame_num);
                 }
-                else {
-                    //if (!is_streaming[3]) objectDisableBegin();
-                    // Toggle button for exporting point cloud data to PLY file
-                    switch_label = is_save_ply ? "Saving" : "Save";
-                    ImGui::PushID("Save PLY");
-                    ImGui::Text("Save PLY");
-                    ImGui::SameLine(ctrl_obj_spacing);
-                    ImGui::Button(switch_label.c_str(), ImVec2({ ctrl_btn_width, 0.0f }));
-                    if (ImGui::IsItemClicked(0)) {
-                        is_save_ply = true;
-                    }
-                    ImGui::PopID();
-                    //if (!is_streaming[3]) objectDisableEnd();
-                }
-                // Toggle button for exporting camera parameter
-                switch_label = is_export_cam_param ? "Saving" : "Save";
-                ImGui::PushID("Save Camera Param");
-                ImGui::Text("Export Camera Parameters");
+                if (!capturing_check) objectDisableEnd();
+                ImGui::PopID();
+                if (streaming_check == 0) objectDisableEnd();
+            }
+            else {
+                // Toggle button for exporting point cloud data to PLY file
+                switch_label = is_save_ply ? "Saving" : "Save";
+                ImGui::PushID("Save PLY");
+                ImGui::Text("Save PLY");
                 ImGui::SameLine(ctrl_obj_spacing);
                 ImGui::Button(switch_label.c_str(), ImVec2({ ctrl_btn_width, 0.0f }));
                 if (ImGui::IsItemClicked(0)) {
-                    is_export_cam_param = true;
+                    is_save_ply = true;
                 }
                 ImGui::PopID();
             }
+            // Toggle button for exporting camera parameter
+            switch_label = is_export_cam_param ? "Saving" : "Save";
+            ImGui::PushID("Save Camera Param");
+            ImGui::Text("Export Camera Parameters");
+            ImGui::SameLine(ctrl_obj_spacing);
+            ImGui::Button(switch_label.c_str(), ImVec2({ ctrl_btn_width, 0.0f }));
+            if (ImGui::IsItemClicked(0)) {
+                is_export_cam_param = true;
+            }
+            ImGui::PopID();
         }
         ImGui::End();
 
         if (is_streaming[3]) {
             ImGui::SetNextWindowPos({ ctrl_window_width, icon_window_height });
-            //ImGui::SetNextWindowSize({ (float)window_width - ctrl_window_width, (float)window_height - icon_window_height });
-            //ImGui::Begin("Disp Window", nullptr, flags_icon_window);
 
             static bool isMouseClicked[2] = { 0, 0 };
             ImVec2 mouseValue;
@@ -913,7 +885,6 @@ int main(int, char**)
                     setZRotation(zRot + mouseRotateRatio * mouseValue.x, zRot);
                 }
             }
-            //ImGui::End();
         }
         else {
             ImGui::SetNextWindowPos({ ctrl_window_width, icon_window_height });
@@ -986,7 +957,6 @@ int main(int, char**)
 
             glEnable(GL_SCISSOR_TEST);
             glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            //glClearDepth(1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             glMatrixMode(GL_PROJECTION);
             if (!cloud_points.empty()) {
@@ -994,12 +964,9 @@ int main(int, char**)
                     savePointsToPly(cloud_points, "./pointcloud.ply");
                     is_save_ply = false;
                 }
-                //glPushMatrix();
                 glLoadIdentity();
                 glOrtho(-2.0, 2.0, -2.0, +2.0, -1.0, 15.0);
-                //glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 1.0);
                 glMatrixMode(GL_MODELVIEW);
-                //glPushMatrix();
                 glLoadIdentity();
 
                 glTranslatef(xTrans, yTrans, zTrans);
@@ -1012,8 +979,7 @@ int main(int, char**)
                 glPointSize(0.1f);
                 glBegin(GL_POINTS);
                 for (unsigned int i = 0; i < cloud_points.size(); i++) {
-                    glColor3ub(cloud_points.at(i).r, cloud_points.at(i).g, cloud_points.at(i).b);	// BGR
-                    //glVertex3f(cloud_points.at(i).x, -cloud_points.at(i).y, cloud_points.at(i).z);
+                    glColor3ub(cloud_points.at(i).r, cloud_points.at(i).g, cloud_points.at(i).b);
                     glVertex3f(cloud_points.at(i).x / 1000.0f, -cloud_points.at(i).y / 1000.0f, cloud_points.at(i).z / 1000.0f);
                 }
                 glEnd();

@@ -341,8 +341,6 @@ void Service::getDepthDispRange(int* range)
 }
 void Service::setDepthDispRange(int* range)
 {
-	//mDepthDispRange[0] = range[0];
-	//mDepthDispRange[1] = range[1];
 	memcpy(mDepthDispRange, range, sizeof(mDepthDispRange));
 }
 
