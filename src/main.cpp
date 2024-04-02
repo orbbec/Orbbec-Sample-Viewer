@@ -894,7 +894,12 @@ int main(int, char**)
                 ob_disp_mat[0] = ob_service->getColorMat();
                 if (ob_disp_mat[0] != nullptr) {
                     float disp_ratio = streaming_window.x / 2.06f / ob_disp_mat[0]->cols;
+                    float temp_ratio = streaming_window.y / 2.06f / ob_disp_mat[0]->rows;
                     mat2texture(ob_disp_mat[0], ob_disp_texture[0]);
+                    if (disp_ratio > temp_ratio) {
+                        disp_ratio = temp_ratio;
+                        ImGui::SetCursorPosX(abs(streaming_window.x / 2 - ob_disp_mat[0]->cols * disp_ratio) / 2);
+                    }
                     ImGui::SetCursorPosY(abs(streaming_window.y / 2 - ob_disp_mat[0]->rows * disp_ratio) / 2);
                     ImGui::Image((void*)(intptr_t)ob_disp_texture[0], ImVec2(ob_disp_mat[0]->cols * disp_ratio, ob_disp_mat[0]->rows * disp_ratio));
                 }
@@ -908,6 +913,7 @@ int main(int, char**)
                 ob_disp_mat[1] = ob_service->getDepthMat();
                 if (ob_disp_mat[1] != nullptr) {
                     float disp_ratio = streaming_window.x / 2.06f / ob_disp_mat[1]->cols;
+                    float temp_ratio = streaming_window.y / 2.06f / ob_disp_mat[1]->rows;
                     cv::Mat disp_mat = ob_disp_mat[1]->clone();
                     if (is_gaussian_blur) {
                         cv::GaussianBlur(disp_mat, disp_mat, cv::Size(filter_size[0], filter_size[0]), 0, 0);
@@ -916,6 +922,10 @@ int main(int, char**)
                         cv::blur(disp_mat, disp_mat, cv::Size(filter_size[1], filter_size[1]));
                     }
                     mat2texture(&disp_mat, ob_disp_texture[1]);
+                    if (disp_ratio > temp_ratio) {
+                        disp_ratio = temp_ratio;
+                        ImGui::SetCursorPosX(abs(streaming_window.x / 2 - disp_mat.cols * disp_ratio) / 2);
+                    }
                     ImGui::SetCursorPosY(abs(streaming_window.y / 2 - disp_mat.rows * disp_ratio) / 2);
                     ImGui::Image((void*)(intptr_t)ob_disp_texture[1], ImVec2(disp_mat.cols * disp_ratio, disp_mat.rows * disp_ratio));
                 }
@@ -929,7 +939,12 @@ int main(int, char**)
                 ob_disp_mat[2] = ob_service->getIRMat();
                 if (ob_disp_mat[2] != nullptr) {
                     float disp_ratio = streaming_window.x / 2.06f / ob_disp_mat[2]->cols;
+                    float temp_ratio = streaming_window.y / 2.06f / ob_disp_mat[2]->rows;
                     mat2texture(ob_disp_mat[2], ob_disp_texture[2]);
+                    if (disp_ratio > temp_ratio) {
+                        disp_ratio = temp_ratio;
+                        ImGui::SetCursorPosX(abs(streaming_window.x / 2 - ob_disp_mat[2]->cols * disp_ratio) / 2);
+                    }
                     ImGui::SetCursorPosY(abs(streaming_window.y / 2 - ob_disp_mat[2]->rows * disp_ratio) / 2);
                     ImGui::Image((void*)(intptr_t)ob_disp_texture[2], ImVec2(ob_disp_mat[2]->cols * disp_ratio, ob_disp_mat[2]->rows * disp_ratio));
                 }

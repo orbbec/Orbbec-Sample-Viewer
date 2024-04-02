@@ -22,6 +22,10 @@ endif()
 file(GLOB SOURCES  "${CMAKE_CURRENT_SOURCE_DIR}/*.h" "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 file(GLOB IMGUI    "${CMAKE_SOURCE_DIR}/include/imgui/*.cpp")
 
+if(MSVC)
+    add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+endif()
+
 if(WIN32)
 	execute_process(COMMAND windres orbbec_sample_viewer.rc -o icon.o)
 	add_executable(${PROJECT_NAME} 

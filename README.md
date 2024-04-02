@@ -2,7 +2,6 @@
 An open source viewer for Orbbec cameras
 
 [Orbbec SDK](https://github.com/orbbec/OrbbecSDK)
-![stability](https://img.shields.io/badge/stability-stable-green) ![version](https://img.shields.io/badge/version-1.9.4-green)
 
 A sample GUI viewer integrated with Orbbec SDK and [ImGui](https://github.com/ocornut/imgui) to demostrate some basic operations that our SDK is capable of.
 
