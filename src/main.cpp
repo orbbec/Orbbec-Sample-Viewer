@@ -655,7 +655,7 @@ int main(int, char**)
                 if (ImGui::BeginCombo("##IR Supported List", current_ir_str.c_str())) {
                     for (int n = 0; n < ob_stream_res_vec[2]->size(); n++) {
                         bool isSelected = (current_ir_str == ob_stream_res_vec[2]->at(n));
-                        if (ImGui::Selectable(ob_stream_res_vec[0]->at(n).c_str(), isSelected)) {
+                        if (ImGui::Selectable(ob_stream_res_vec[2]->at(n).c_str(), isSelected)) {
                             if (current_ir_str != ob_stream_res_vec[2]->at(n)) {
                                 current_ir_str = ob_stream_res_vec[2]->at(n);
                                 ob_service->setIRVideoMode(n);
